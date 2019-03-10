@@ -162,8 +162,15 @@ button {
 .player{
     display: none;
     margin-top:0px;
-    height: 108px;
+    height: 105px;
     width: 120px;
     background: url(../img/player_idle.png)120px 2551px;
+    background-clip: inherit;
+}
+
+.enemy{
+    height: 91px;
+    width: 120px;
+    background: url(../img/spritesheet_rev.png)0px 0px;
     background-clip: inherit;
 }

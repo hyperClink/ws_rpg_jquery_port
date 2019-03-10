@@ -6,7 +6,7 @@ timeM_str = " ",
 
 idleoffset = 0,
 player_flip_offset = 0,
-player_speed = 0.8,
+player_speed = 1,
 
 window_size = (innerWidth+innerHeight)/50,
 
@@ -15,7 +15,8 @@ x_scroll = 0,
 
 attack = false,
 left = false,
-right = false;
+right = false,
+idle = true;
 
 $('.screen-game').css("width", window.innerWidth + "px");
 $('.screen-game').css("height", window.innerHeight + "px");
@@ -85,26 +86,27 @@ function init() {
 	sprite_idle(0);
 	console.log('ok');
 	setInterval(timer, 1000);
-	setInterval(control_handler_sprite, 70);
+	setInterval(control_handler_sprite, 50);
 	setInterval(control_handler_movement, 10);
 };
 //функция анимации спрайта
 function sprite_right(yS){
 	//передвигаем квадрат захвата картинки на каждом шаге вправо на 120px
 	$('.player').css("background", "url(assets/img/walkin2.png)" + "120" + "px " + yS + "px");
-	yS -= 323.275;
+	yS -= 107.76;
 	return yS;
 };
 //передвигаем квадрат захвата картинки на каждом шаге влево на -120px
 function sprite_left(yS){
 	$('.player').css("background", "url(assets/img/walkin2.png)" + "0" + "px " + yS + "px");
-	yS -= 323.275;
+	yS -= 107.76;
+	console.log(yS);
 	return yS;
 };
 
 function sprite_idle(yS){
 	$('.player').css("background", "url(assets/img/idle2.png)" + idleoffset + "px " + yS + "px");
-	yS += 117.8;
+	yS -= 111.6;
 	return yS;
 };
 
@@ -120,12 +122,12 @@ function timer2(){
 	if (s_g<10){
 		s_g+=1;
 		s='0'+s_g;
-	}
+	};
 	//если секунд больше 9 и меньше 59, то прибавляем единицу
 	if (s_g>9 && s_g<59){
 		s_g+=1;
 		s=s_g;
-	}
+	};
 	//если секунд =59, то к минтам прибавляем 1 и реализуем минуты как секунды ранее
 	if (s_g==59){
 		s_g=0;
@@ -135,12 +137,12 @@ function timer2(){
 		}else{
 			m_g+=1;
 			m=m_g;
-		}
-	}
+		};
+	};
 //выводим время в формате 00:00
 	return $('.timer').html("Time: "+m+":"+s);
 
-}
+};
 
 function timer(){
 if (timeS<59){
@@ -156,6 +158,22 @@ $(".timer").text("Time: " + timeM_str + ":" + timeS_str);
 
 function control_handler_sprite(){
 
+	if ( (left==false && right==false) || (left==true && right==true) ){
+		idle = true;
+	} else {
+		if(idle == true){
+			heightSprite = 0;
+		}
+		idle = false;
+	};
+
+	if (idle == true){
+		heightSprite = sprite_idle(heightSprite);
+		if(heightSprite < 0){
+			heightSprite = 2003;
+		};
+	};
+
 	if (left==true && right==false){
 		idleoffset = 120;
 		player_flip_offset = -40;
@@ -164,13 +182,13 @@ function control_handler_sprite(){
 	if (right==true && left==false){
 		idleoffset = 0;
 		player_flip_offset = 0;
-	}
+	};
 
 	if (left==true && attack==false && right==false){
 
 		$('.player').css("margin-left", xPos+player_flip_offset+"px");
 		heightSprite = sprite_right(heightSprite);
-		if(heightSprite == 0){
+		if(heightSprite < 0){
 			heightSprite = 2694;
 		};
 
@@ -180,28 +198,31 @@ function control_handler_sprite(){
 
 		$('.player').css("margin-left", xPos+player_flip_offset+"px");
 		heightSprite = sprite_left(heightSprite);
-	};
 
-	if ( (left==false && right==false) || (left==true && right==true) ){
-		sprite_idle(0);
+		if(heightSprite < 0){
+			heightSprite = 2694;
+		};
 	};
 
 };
 
 function control_handler_movement(){
-	if (left==true && attack==false){
-		if(xPos>innerWidth/2-(window_size)-50 || x_scroll>=0){
-			xPos-=player_speed;
-			scroll = false;
-		}else{
+	if (xPos>0){
+		if (left==true){
+			if(xPos>innerWidth/2-(window_size)-50 || x_scroll>=0){
+				xPos-=player_speed;
+				scroll = false;
+			}else{
 			x_scroll+=player_speed;
 			bg(x_scroll);
 			scroll = true;
 		};
 	};
+};
 
-		if (right==true && attack==false){
-			if(xPos<innerWidth/2-(window_size) || (x_scroll-xPos)<=$('.screen-game').width){
+	if (xPos<innerWidth-125){
+		if (right==true){
+			if(xPos<innerWidth/2-(window_size) || x_scroll<= -8500){
 				xPos+=player_speed;
 				scroll = false;
 			}else{
@@ -211,3 +232,4 @@ function control_handler_movement(){
 			};
 		};
 	};
+};
