@@ -169,8 +169,9 @@ button {
 }
 
 .enemy{
-    height: 91px;
+    margin-top:0px;
+    height: 88px;
     width: 120px;
-    background: url(../img/spritesheet_rev.png)0px 0px;
+    background: url(../img/spritesheet_rev.png);
     background-clip: inherit;
 }

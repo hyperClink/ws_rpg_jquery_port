@@ -35,7 +35,10 @@ $('#again').on("click", function(){
 //sprites
 var xPos = 10;
 bg_pos = window.innerWidth,
-heightSprite = 0;
+heightSprite = 0,
+
+heightSprite_e1 = 0,
+enemy_x = 0;
 
 var m,s,m_g,s_g,
 m='0'+0,
@@ -83,11 +86,13 @@ function init() {
 	timer();
 	bg(0);
 	$('.player').css("margin-top", innerHeight - 200 + "px");
+	$('.enemy').css("margin-top", innerHeight - 730 + "px");
 	sprite_idle(0);
 	console.log('ok');
 	setInterval(timer, 1000);
 	setInterval(control_handler_sprite, 50);
 	setInterval(control_handler_movement, 10);
+	setInterval(enemy, 60);
 };
 //функция анимации спрайта
 function sprite_right(yS){
@@ -100,13 +105,18 @@ function sprite_right(yS){
 function sprite_left(yS){
 	$('.player').css("background", "url(assets/img/walkin2.png)" + "0" + "px " + yS + "px");
 	yS -= 107.76;
-	console.log(yS);
 	return yS;
 };
 
 function sprite_idle(yS){
 	$('.player').css("background", "url(assets/img/idle2.png)" + idleoffset + "px " + yS + "px");
 	yS -= 111.6;
+	return yS;
+};
+
+function enemy_dog(yS){
+	$('.enemy').css("background", "url(assets/img/spritesheet_rev.png)" + "0" + "px " + yS + "px");
+	yS -= 85;
 	return yS;
 };
 
@@ -232,4 +242,14 @@ function control_handler_movement(){
 			};
 		};
 	};
+};
+
+function enemy(){
+	if (enemy_x<innerWidth-$('.enemy').width()-6){
+		enemy_x+=10;
+	} else {
+		enemy_x=2;
+	};
+	$('.enemy').css("margin-left",enemy_x+"px");
+	heightSprite_e1 = enemy_dog(heightSprite_e1);
 };
