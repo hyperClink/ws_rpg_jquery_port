@@ -1,23 +1,31 @@
-
+//timer variables
 let timeS = 0,
 timeM = 0,
 timeS_str = " ",
 timeM_str = " ",
 
-idleoffset = 0,
-player_flip_offset = 0,
+//player
 player_speed = 1,
 
+//scaling
 window_size = (innerWidth+innerHeight)/50,
 
+//bg scroll
 scroll = false,
 x_scroll = 0,
 
+//controls
 attack = false,
 left = false,
 right = false,
-idle = true;
+idle = true,
 
+//enemy
+enemies = [];
+enemy_speed = -10,
+id = 0;
+
+//scale bg)
 $('.screen-game').css("width", window.innerWidth + "px");
 $('.screen-game').css("height", window.innerHeight + "px");
 
@@ -33,18 +41,14 @@ $('#again').on("click", function(){
 });
 
 //sprites
-var xPos = 10;
+var xPos = 10,
+player_flip_offset = 0,
+
 bg_pos = window.innerWidth,
 heightSprite = 0,
 
 heightSprite_e1 = 0,
 enemy_x = 0;
-
-var m,s,m_g,s_g,
-m='0'+0,
-s=0,
-m_g=0,
-s_g=0;
 
 //обрабатываем события с клавиатуры
 $(document).keypress(function(event){
@@ -76,6 +80,7 @@ $(document).keyup(function(event){
 	}
 
 });
+
 // основной игровой цикл
 function init() {
 	//после запуска игры выключаем рейтинг и включаем рыцаря
@@ -85,31 +90,41 @@ function init() {
 	//запускаем таймер
 	timer();
 	bg(0);
+
 	$('.player').css("margin-top", innerHeight - 200 + "px");
-	$('.enemy').css("margin-top", innerHeight - 730 + "px");
+
+	$('.enemy').css("margin-top", -75 + "px");
+
+	setInterval(createEnemy, 1000);
+
 	sprite_idle(0);
 	console.log('ok');
+
 	setInterval(timer, 1000);
 	setInterval(control_handler_sprite, 50);
 	setInterval(control_handler_movement, 10);
 	setInterval(enemy, 60);
+
+	enemy_x=innerWidth-90;
 };
 //функция анимации спрайта
 function sprite_right(yS){
 	//передвигаем квадрат захвата картинки на каждом шаге вправо на 120px
-	$('.player').css("background", "url(assets/img/walkin2.png)" + "120" + "px " + yS + "px");
+	$('.player').css("background", "url(assets/img/walkin2.png)" + "0" + "px " + yS + "px");
+	$('.player').css("transform", "scaleX(-1)");
 	yS -= 107.76;
 	return yS;
 };
 //передвигаем квадрат захвата картинки на каждом шаге влево на -120px
 function sprite_left(yS){
 	$('.player').css("background", "url(assets/img/walkin2.png)" + "0" + "px " + yS + "px");
+	$('.player').css("transform", "scaleX(1)");
 	yS -= 107.76;
 	return yS;
 };
 
 function sprite_idle(yS){
-	$('.player').css("background", "url(assets/img/idle2.png)" + idleoffset + "px " + yS + "px");
+	$('.player').css("background", "url(assets/img/idle2.png)" + 0 + "px " + yS + "px");
 	yS -= 111.6;
 	return yS;
 };
@@ -124,34 +139,6 @@ function bg(yS){
 	$('.screen-game').css("background-position", yS + "px " + innerHeight +"px");
 	yS += 3;
 	return yS;
-};
-
-//реализация таймера
-function timer2(){
-//если секунд меньше 10, то прибавляем единицу и к секундам спреди добавляем '0' на каждом шаге
-	if (s_g<10){
-		s_g+=1;
-		s='0'+s_g;
-	};
-	//если секунд больше 9 и меньше 59, то прибавляем единицу
-	if (s_g>9 && s_g<59){
-		s_g+=1;
-		s=s_g;
-	};
-	//если секунд =59, то к минтам прибавляем 1 и реализуем минуты как секунды ранее
-	if (s_g==59){
-		s_g=0;
-		if (m_g<10){
-			m_g+=1
-			m='0'+m_g;
-		}else{
-			m_g+=1;
-			m=m_g;
-		};
-	};
-//выводим время в формате 00:00
-	return $('.timer').html("Time: "+m+":"+s);
-
 };
 
 function timer(){
@@ -169,8 +156,15 @@ $(".timer").text("Time: " + timeM_str + ":" + timeS_str);
 function control_handler_sprite(){
 
 	if ( (left==false && right==false) || (left==true && right==true) ){
+
+			if(idle == false){
+			heightSprite = 0;
+		}
+
 		idle = true;
-	} else {
+	}
+	else
+	{
 		if(idle == true){
 			heightSprite = 0;
 		}
@@ -185,12 +179,10 @@ function control_handler_sprite(){
 	};
 
 	if (left==true && right==false){
-		idleoffset = 120;
 		player_flip_offset = -40;
 	};
 
 	if (right==true && left==false){
-		idleoffset = 0;
 		player_flip_offset = 0;
 	};
 
@@ -244,12 +236,55 @@ function control_handler_movement(){
 	};
 };
 
+
 function enemy(){
-	if (enemy_x<innerWidth-$('.enemy').width()-6){
-		enemy_x+=10;
-	} else {
-		enemy_x=2;
-	};
-	$('.enemy').css("margin-left",enemy_x+"px");
 	heightSprite_e1 = enemy_dog(heightSprite_e1);
+
+	for (var i = 0; i < enemies.length; i++) {
+
+		if(enemies.length != 'undefined' && enemies.length != 0){
+			var div_id = i+id-enemies.length
+			$("#enemy"+enemies[i].id).css("margin-left",enemies[i].x+"px");
+			$("#enemy"+enemies[i].id).css("margin-top", -85, "px");
+
+			enemies[i].x+=enemies[i].speed;
+
+			if (enemies[i].speed<=0){
+			$("#enemy"+enemies[i].id).css("transform", "scaleX(-1)");
+		};
+
+			if (enemies[i].x<0 || enemies[i].x>innerWidth-$("#enemy"+enemies[i].id).width()){
+				$("#enemy"+enemies[i].id).remove();
+				enemies.splice(i--, 1);
+			};
+
+		};
+	};
+
+};
+
+function createEnemy(){
+	enemies.push({x:getRandomInt(20, innerWidth-120), speed:coinflip(10), id:id });
+	$('.screen-game').append("<div id='enemy" + id + "' class='enemy'> </div>");
+	id++;
+
+};
+
+//miscellaneous
+function listids(clas){
+	var ids = $(clas).map(function () {
+	return this.id;
+}).get().join();
+
+console.log(ids);
+};
+
+function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+};
+
+function coinflip(flip){
+return flip*(Math.round(Math.random()) * 2 - 1)
 };

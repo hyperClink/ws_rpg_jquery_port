@@ -169,6 +169,7 @@ button {
 }
 
 .enemy{
+    position: absolute;
     margin-top:0px;
     height: 88px;
     width: 120px;
