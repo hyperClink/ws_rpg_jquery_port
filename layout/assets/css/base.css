@@ -163,12 +163,13 @@ button {
     display: none;
     margin-top:0px;
     height: 105px;
-    width: 120px;
-    background: url(../img/player_idle.png)120px 2551px;
+    width: 165px;
+    background: url(../img/player_idle.png);
     background-clip: inherit;
 }
 
 .enemy{
+    display: none;
     position: absolute;
     margin-top:0px;
     height: 88px;
