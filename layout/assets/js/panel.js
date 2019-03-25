@@ -6,6 +6,7 @@ timeM_str = " ",
 
 //player
 player_speed = 1,
+hp = 100,
 
 //scaling
 window_size = (innerWidth+innerHeight)/50,
@@ -33,9 +34,11 @@ enemy_speed = -10,
 id = 0,
 
 //attacks
-swords[];
+swords = [],
+id_sword = 0,
+mp = 100;
 
-//scale bg)
+//scale bg
 $('.screen-game').css("width", window.innerWidth + "px");
 $('.screen-game').css("height", window.innerHeight + "px");
 
@@ -57,8 +60,7 @@ player_flip_offset = 0,
 bg_pos = window.innerWidth,
 heightSprite = 0,
 
-heightSprite_e1 = 0,
-enemy_x = 0;
+heightSprite_e1 = 0;
 
 //обрабатываем события с клавиатуры
 $(document).keypress(function(event){
@@ -78,7 +80,15 @@ $(document).keypress(function(event){
 	};
 
 	if(event.key=="2" && action == "none"){
-		action = "block";
+	mp_action("block");
+	};
+
+	if(event.key=="3" && action == "none"){
+	mp_action("swords3");
+	};
+
+	if(event.key=="4" && action == "none"){
+	mp_action("swords8");
 	};
 
 
@@ -119,44 +129,46 @@ function init() {
 
 	$('.player').css("margin-top", innerHeight - 200 + "px");
 
-	$('.enemy').css("margin-top", -75 + "px");
-
-	setInterval(createEnemy, 4000);
-
 	sprite_idle(0);
-	console.log('ok');
+	console.log('bg, player css, timer set');
 
-	setInterval(timer, 10000);
+	setInterval(timer, 1000);
 	setInterval(control_handler_sprite, 50);
 	setInterval(control_handler_movement, 10);
+	setInterval(createEnemy, 4000);
 	setInterval(enemy, 60);
+	setInterval(sword_attacks, 30);
+	console.log('interval funcs. set');
 
-	enemy_x=innerWidth-90;
 };
 //функция анимации спрайта
 function sprite_right(yS){
 	//передвигаем квадрат захвата картинки на каждом шаге вправо на 120px
-	$('.player').css("background", "url(assets/img/walkin2.png)" + "0" + "px " + yS + "px");
+	$('.player').css("background", "url(assets/img/walkin3.png)" + "0" + "px " + yS + "px");
 	$('.player').css("transform", "scaleX(-1)");
-	yS -= 107.76;
+	$('.player').css("width", "106px");
+	yS -= 107.715;
 	return yS;
 };
 //передвигаем квадрат захвата картинки на каждом шаге влево на -120px
 function sprite_left(yS){
-	$('.player').css("background", "url(assets/img/walkin2.png)" + "0" + "px " + yS + "px");
+	$('.player').css("background", "url(assets/img/walkin3.png)" + "0" + "px " + yS + "px");
 	$('.player').css("transform", "scaleX(1)");
-	yS -= 107.76;
+	$('.player').css("width", "106px");
+	yS -= 107.715;
 	return yS;
 };
 
 function sprite_idle(yS){
-	$('.player').css("background", "url(assets/img/idle2.png)" + 0 + "px " + yS + "px");
+	$('.player').css("background", "url(assets/img/idle2.png)" + "0px " + yS + "px");
+	$('.player').css("width", "90px");
+
 	yS -= 111.6;
 	return yS;
 };
 
 function enemy_dog(yS){
-	$('.enemy').css("background", "url(assets/img/spritesheet_rev.png)" + "0" + "px " + yS + "px");
+	$('.enemy').css("background", "url(assets/img/spritesheet_rev.png)" + "0px " + yS + "px");
 	yS -= 85;
 	return yS;
 };
@@ -168,13 +180,16 @@ function bg(yS){
 };
 
 function sprite_attack(yS){
-	$('.player').css("background", "url(assets/img/attack_smol1.png)" + 0 + "px " + yS + "px");
-	yS -= 111.6;
+	$('.player').css("background", "url(assets/img/attack_smol1.png)" + "0px " + yS + "px");
+	$('.player').css("width", "166px");
+	yS -= 111.65;
 	return yS;
 };
 
 function sprite_block(yS){
-	$('.player').css("background", "url(assets/img/block_smol.png)" + 0 + "px " + yS + "px");
+	$('.player').css("background", "url(assets/img/block_smol.png)" + 0 + "px " + (yS) + "px");
+	$('.player').css("width", "91px");
+
 	yS -= 111.6;
 	return yS;
 };
@@ -182,7 +197,7 @@ function sprite_block(yS){
 
 function timer(){
 if (timeS<59){
-  timeS++
+  timeS++;
 }else{
   timeS=0;
   timeM++;
@@ -193,7 +208,7 @@ $(".timer").text("Time: " + timeM_str + ":" + timeS_str);
 };
 
 function control_handler_sprite(){
-	if (action == "none"){	
+	if (action == "none"){
 
 		if ( (left==false && right==false) || (left==true && right==true) ){
 
@@ -219,7 +234,7 @@ function control_handler_sprite(){
 		};
 
 		if (left==true && right==false){
-			player_flip_offset = -40;
+			player_flip_offset = -35;
 		};
 
 		if (right==true && left==false){
@@ -231,7 +246,7 @@ function control_handler_sprite(){
 			$('.player').css("margin-left", xPos+player_flip_offset+"px");
 			heightSprite = sprite_right(heightSprite);
 			if(heightSprite < 0){
-				heightSprite = 2694;
+				heightSprite = 2692;
 			};
 
 		};
@@ -242,16 +257,16 @@ function control_handler_sprite(){
 			heightSprite = sprite_left(heightSprite);
 
 			if(heightSprite < 0){
-				heightSprite = 2694;
+				heightSprite = 2692;
 			};
 		};
 
 }else{
 	switch(action){
 
-		case "attack":
+			case "attack":
 			if (attack_process == false){
-				heightSprite = 2344;
+				heightSprite = 2339;
 			};
 
 			attack_process=true;
@@ -262,30 +277,27 @@ function control_handler_sprite(){
 				attack_process=false;
 				heightSprite = 0;
 			};
-			break;
+				break;
 
 			case "block":
 			if (block_process == false){
-				heightSprite = 2561;
+				heightSprite = 2566;
 			};
+
+			$('.player').css("height", "110px");
+			$('.player').css("margin-top", innerHeight - 205, "px");
 
 			block_process=true;
-			heightSprite = sprite_block(heightSprite);
 
 			if(heightSprite < 0){
+				heightSprite = 0;
+				$('.player').css("margin-top", innerHeight - 200, "px");
+				$('.player').css("height", "105px");
 				action = "none";
 				block_process=false;
-				heightSprite = 0;
 			};
-			break;
-
-			case "sword-3":
-			createSword(3);
-			break;
-
-			case "sword-8":
-			createSword(8);
-			break;
+				heightSprite = sprite_block(heightSprite);
+				break;
 
 	};
 };
@@ -293,6 +305,7 @@ function control_handler_sprite(){
 
 //cool
 function control_handler_movement(){
+
 	if (action == "none"){
 
 		if (xPos>0){
@@ -331,13 +344,12 @@ function enemy(){
 	for (var i = 0; i < enemies.length; i++) {
 
 		if(enemies.length != 'undefined' && enemies.length != 0){
-			var div_id = i+id-enemies.length;
-			$("#enemy"+enemies[i].id).css("margin-left",enemies[i].x+"px");
-			$("#enemy"+enemies[i].id).css("margin-top", -85, "px");
 
 			$("#enemy"+enemies[i].id).css("display", "block");
+			var div_id = i+id-enemies.length;
 
 			enemies[i].x+=enemies[i].speed;
+			$("#enemy"+enemies[i].id).css("margin-left",enemies[i].x+"px");
 
 			if (scroll == true){
 				if (right == true){
@@ -348,12 +360,7 @@ function enemy(){
 					enemies[i].x+=player_speed;
 				};
 			};
-
-			if (enemies[i].speed<=0){
-			$("#enemy"+enemies[i].id).css("transform", "scaleX(-1)");
-		};
-
-			if (enemies[i].x<0-$("#enemy"+enemies[i].id).width() || enemies[i].x>innerWidth-$("#enemy"+enemies[i].id).width()){
+			if (enemies[i].x<0-$("#enemy"+enemies[i].id).width()){
 				$("#enemy"+enemies[i].id).remove();
 				enemies.splice(i--, 1);
 			};
@@ -366,17 +373,86 @@ function enemy(){
 function createEnemy(){
 	enemies.push({x:getRandomInt(innerWidth/2, innerWidth-120), speed:-10, id:id });
 	$('.screen-game').append("<div id='enemy" + id + "' class='enemy'> </div>");
+
+	$("#enemy"+id).css("margin-top", innerHeight-180, "px");
+
 	id++;
 
 };
 
-function createSword(countof){
-	for (var i = 0; i < countof; i++) {
-		swords.push({x:getRandomInt(innerWidth/2, innerWidth-120), y:innerHeight-20});
-		$('.screen-game').append("<div id='sword" + id + "' class='sword'> </div>");
-		id++;
+function createSword(attack){
+
+	if (attack == "trio"){
+			for (var i = 0; i < 3; i++){
+				swords.push({x:xPos-getRandomInt(-35, 35), y:innerHeight-160-getRandomInt(-35, 35), id:id_sword, type:"trio"});
+				$('.screen-game').append("<div id='sword" + id_sword + "' class='sword'> </div>");
+				id_sword++;
+			};
+		};
+
+	if (attack == "rain"){
+		swords.push({x:getRandomInt(xPos-100, xPos+100), y:0, id:id_sword, type:"rain"});
+		$('.screen-game').append("<div id='sword" + id_sword + "' class='sword'> </div>");
+		id_sword++;
 	};
 
+
+};
+
+function sword_attacks(){
+	for (var i = 0; i < swords.length; i++) {
+		if(swords.length != 'undefined' && swords.length != 0){
+
+			$("#sword"+swords[i].id).css("margin-top", swords[i].y, "px");
+			$("#sword"+swords[i].id).css("margin-left", swords[i].x, "px");
+			swords[i].x+=25;
+
+			$("#sword"+swords[i].id).css("display", "block");
+
+			if (swords[i].x>innerWidth-$("#sword"+swords[i].id).width()){
+				$("#sword"+swords[i].id).remove();
+				enemies.splice(i--, 1);
+			};
+
+		};
+	};
+};
+
+function mp_action(act){
+
+	switch (act) {
+		case "block":
+		if (mp>=5){
+			mp_delta(-5);
+			action = "block";
+		};
+		break;
+
+		case "swords3":
+		if (mp>=10){
+			mp_delta(-10);
+			createSword("trio");
+		};
+		break;
+
+		case "swords8":
+		if (mp>=30){
+			mp_delta(-30);
+			createSword("rain");
+		};
+		break;
+	};
+
+};
+
+function mp_delta(amount){
+	mp+=amount;
+	$('.panel-mp > div > span').text(mp);
+};
+
+function hp_delta(amount){
+	hp+=amount;
+	$('.panel-hp > div > span').text(hp);
 };
 
 //miscellaneous

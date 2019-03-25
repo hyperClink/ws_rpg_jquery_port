@@ -160,6 +160,7 @@ button {
 
 
 .player{
+    position: absolute;
     display: none;
     margin-top:0px;
     height: 105px;
@@ -171,9 +172,17 @@ button {
 .enemy{
     display: none;
     position: absolute;
-    margin-top:0px;
+    margin-top: 0px;
     height: 88px;
     width: 120px;
     background: url(../img/spritesheet_rev.png);
     background-clip: inherit;
+}
+
+.sword{
+    display: none;
+    position: absolute;
+    height: 25px;
+    width: 125px;
+    content: url(../img/sword-better.png);
 }
