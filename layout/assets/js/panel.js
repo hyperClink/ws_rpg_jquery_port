@@ -7,6 +7,7 @@ timeM_str = " ",
 //player
 player_speed = 1,
 hp = 100,
+direction_player = "right",
 
 //scaling
 window_size = (innerWidth+innerHeight)/50,
@@ -36,6 +37,8 @@ id = 0,
 //attacks
 swords = [],
 id_sword = 0,
+trio_cooldown = 0,
+rain_cooldown = 0,
 mp = 100;
 
 //scale bg
@@ -205,6 +208,16 @@ if (timeS<59){
 timeM_str = timeM.toString().padStart(2, "0");
 timeS_str = timeS.toString().padStart(2, "0");
 $(".timer").text("Time: " + timeM_str + ":" + timeS_str);
+
+if(mp==99){
+	mp_delta(1);
+}else if(mp<100){
+	mp_delta(2);
+};
+
+trio_cooldown--;
+rain_cooldown--;
+
 };
 
 function control_handler_sprite(){
@@ -235,10 +248,12 @@ function control_handler_sprite(){
 
 		if (left==true && right==false){
 			player_flip_offset = -35;
+			direction_player = "left";
 		};
 
 		if (right==true && left==false){
 			player_flip_offset = 0;
+			direction_player = "right";
 		};
 
 		if (left==true && action=="none" && right==false){
@@ -365,6 +380,13 @@ function enemy(){
 				enemies.splice(i--, 1);
 			};
 
+			for (var j = 0; j < swords.length; j--) {
+				if (enemies[i].x<swords[j].x+$("#sword"+swords[i].id).width() && enemies[i].x+$("#enemy"+enemies[i].id).width()>swords[j].x){
+					$("#enemy"+enemies[i].id).remove();
+					enemies.splice(i--, 1);
+				};
+			};
+
 		};
 	};
 
@@ -384,16 +406,18 @@ function createSword(attack){
 
 	if (attack == "trio"){
 			for (var i = 0; i < 3; i++){
-				swords.push({x:xPos-getRandomInt(-35, 35), y:innerHeight-160-getRandomInt(-35, 35), id:id_sword, type:"trio"});
+				swords.push({x:xPos-getRandomInt(-35, 35), y:innerHeight-160-getRandomInt(-35, 35), id:id_sword, flip:direction_player, type:"trio"});
 				$('.screen-game').append("<div id='sword" + id_sword + "' class='sword'> </div>");
 				id_sword++;
 			};
 		};
 
 	if (attack == "rain"){
-		swords.push({x:getRandomInt(xPos-100, xPos+100), y:0, id:id_sword, type:"rain"});
-		$('.screen-game').append("<div id='sword" + id_sword + "' class='sword'> </div>");
-		id_sword++;
+		for (var i = 0; i < 20; i++){
+				swords.push({x:xPos-getRandomInt(-170, 150), y:getRandomInt(-500, 0)-100, id:id_sword, flip:"down", type:"rain"});
+				$('.screen-game').append("<div id='sword" + id_sword + "' class='sword'> </div>");
+				id_sword++;
+			};
 	};
 
 
@@ -405,13 +429,22 @@ function sword_attacks(){
 
 			$("#sword"+swords[i].id).css("margin-top", swords[i].y, "px");
 			$("#sword"+swords[i].id).css("margin-left", swords[i].x, "px");
-			swords[i].x+=25;
+
+			if (swords[i].flip == "right"){
+				swords[i].x+=25;
+			}else if(swords[i].flip == "left"){
+				$("#sword"+swords[i].id).css("transform", "scaleX(-1)");
+				swords[i].x-=25;
+			}else if(swords[i].flip == "down"){
+				$("#sword"+swords[i].id).css("transform", "rotate(90deg)");
+				swords[i].y+=25;
+			};
 
 			$("#sword"+swords[i].id).css("display", "block");
 
-			if (swords[i].x>innerWidth-$("#sword"+swords[i].id).width()){
+			if (swords[i].x>innerWidth-$("#sword"+swords[i].id).width() || swords[i].y>innerHeight-50){
 				$("#sword"+swords[i].id).remove();
-				enemies.splice(i--, 1);
+				swords.splice(i--, 1);
 			};
 
 		};
@@ -429,15 +462,17 @@ function mp_action(act){
 		break;
 
 		case "swords3":
-		if (mp>=10){
+		if (mp>=10 && trio_cooldown<=0){
 			mp_delta(-10);
+			trio_cooldown = 3;
 			createSword("trio");
 		};
 		break;
 
 		case "swords8":
-		if (mp>=30){
+		if (mp>=30 && rain_cooldown<=0){
 			mp_delta(-30);
+			rain_cooldown = 15;
 			createSword("rain");
 		};
 		break;
@@ -448,6 +483,7 @@ function mp_action(act){
 function mp_delta(amount){
 	mp+=amount;
 	$('.panel-mp > div > span').text(mp);
+	$('.panel-mp').css("width", 176-((100-mp)*1.76));
 };
 
 function hp_delta(amount){
